@@ -7,6 +7,7 @@ public class KeyBox : MonoBehaviour
 {
     public Animator animator;
     private AudioSource sound;
+    private bool BoxIsClosed;
     private bool messageActive;
 
     public Text messageOnBox;
@@ -16,6 +17,7 @@ public class KeyBox : MonoBehaviour
     void Start()
     {
         messageActive = false;
+        BoxIsClosed = true;
        // animator = GetComponent<Animator>();
         sound = GetComponent<AudioSource>();
     }
@@ -34,18 +36,7 @@ public class KeyBox : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.F))
             {
-                if (!animator.GetBool("BoxOpen"))
-                {
-                    animator.SetBool("BoxOpen", true);
-                    sound.PlayDelayed(0.8f);
-                    setMessage();
-                }
-                else
-                {
-                    animator.SetBool("BoxOpen", false);
-                    sound.PlayDelayed(0.8f);
-                    setMessage();
-                }
+                StartCoroutine(OpenCloseChest());
             }
         }
         else
@@ -58,6 +49,15 @@ public class KeyBox : MonoBehaviour
         }
     }
 
+    IEnumerator OpenCloseChest()
+    {
+        animator.SetBool("BoxOpen", BoxIsClosed);
+        sound.PlayDelayed(0.8f);
+        BoxIsClosed = !BoxIsClosed;
+        
+        yield return new WaitForSeconds(3);
+        setMessage();
+    }
     private void setMessage()
     {
         if (!animator.GetBool("BoxOpen"))
