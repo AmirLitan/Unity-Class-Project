@@ -34,6 +34,7 @@ public class KeyBox : MonoBehaviour
                 setMessage();
                 messageActive = true;
             }
+            
             if (Input.GetKeyDown(KeyCode.F))
             {
                 StartCoroutine(OpenCloseChest());
