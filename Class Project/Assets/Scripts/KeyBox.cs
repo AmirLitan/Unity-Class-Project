@@ -35,10 +35,10 @@ public class KeyBox : MonoBehaviour
                 messageActive = true;
             }
             
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                StartCoroutine(OpenCloseChest());
-            }
+            // if (Input.GetKeyDown(KeyCode.F))
+            // {
+            //     StartCoroutine(OpenCloseChest());
+            // }
         }
         else
         {

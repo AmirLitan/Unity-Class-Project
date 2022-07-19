@@ -6,6 +6,8 @@ public class BridgeMotion : MonoBehaviour
 {
     private Animator BridgeAnimator;
     private AudioSource sound;
+    private bool isTrigger = false;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -20,7 +22,10 @@ public class BridgeMotion : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
+        if(!isTrigger){
         BridgeAnimator.SetBool("BridgeDown",true);
         sound.PlayDelayed(0.2f);
+        isTrigger = true;
+        }
     }
 }

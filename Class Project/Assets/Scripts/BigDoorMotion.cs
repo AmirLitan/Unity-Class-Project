@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BigDoorMotion : MonoBehaviour
+public class BigDoorMotion : MonoBehaviour  
 {
+    
     private Animator doorsAnimator;
     private AudioSource sound;
     private bool doorOpen;
 
+    public GameObject player;
     public GameObject keyHole;
-    public Text messageOnBox;
+    public string messageOnBox;
     private bool messageActive;
     // Start is called before the first frame update
     void Start()
@@ -35,10 +37,10 @@ public class BigDoorMotion : MonoBehaviour
         }
         else
         {
-            if(!messageActive)
+            if(messageActive)
             {
                 messageActive = true;
-                messageOnBox.text = "Need key to open";
+                player.GetComponent<PlayerInteract>().SendMessage("Need key to open");
             }
         }
     }
@@ -47,7 +49,7 @@ public class BigDoorMotion : MonoBehaviour
     {
         if(messageActive){
             messageActive = false;
-            messageOnBox.text = "";
+            player.GetComponent<PlayerInteract>().SendMessage("");
         }
         if(!doorOpen && keyHole.activeSelf)
         {
