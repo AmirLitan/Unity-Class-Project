@@ -7,6 +7,8 @@ public class BulletProjectile : MonoBehaviour
     [SerializeField] private Transform vfxHitOpject;
     private Rigidbody bulletRigidbody;
 
+    [SerializeField] int damage = 20;
+
 
 
     private void Awake() 
@@ -22,6 +24,10 @@ public class BulletProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if(other.TryGetComponent<NPCController>(out NPCController npc))
+        {
+            npc.getHit(damage);
+        }
         Instantiate(vfxHitOpject , transform.position , Quaternion.identity);
         Destroy(gameObject);
     }

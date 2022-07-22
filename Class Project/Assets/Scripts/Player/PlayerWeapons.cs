@@ -43,7 +43,6 @@ public class PlayerWeapons : MonoBehaviour
             Vector3 aimDir = (mousWorldPosition - spawnBulletPosistion.position).normalized;
             Instantiate(vfxFire, spawnBulletPosistion.position , Quaternion.LookRotation(aimDir, Vector3.up));
             Instantiate(bulletProjectile, spawnBulletPosistion.position , Quaternion.LookRotation(aimDir, Vector3.up));
-           // fireAnimation.SetBool("isFire", false);
             fireAnimation.SetBool("isFire", true);
             isFiring = false;
         }
