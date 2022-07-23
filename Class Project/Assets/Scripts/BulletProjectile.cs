@@ -24,9 +24,21 @@ public class BulletProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.TryGetComponent<NPCController>(out NPCController npc))
+        if(other.TryGetComponent<PlayerUI>(out PlayerUI player))
         {
-            npc.getHit(damage);
+            player.getHit(damage);
+        }
+        if(other.TryGetComponent<NPCController>(out NPCController frandly))
+        {
+            frandly.getHit(damage);
+        }
+        if(other.TryGetComponent<EnemyNPCController>(out EnemyNPCController enemy))
+        {
+            enemy.getHit(damage);
+        }
+        if(other.TryGetComponent<LeaderNPCController>(out LeaderNPCController leader))
+        {
+            leader.getHit(damage);
         }
         Instantiate(vfxHitOpject , transform.position , Quaternion.identity);
         Destroy(gameObject);

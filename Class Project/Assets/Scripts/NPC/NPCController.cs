@@ -37,7 +37,7 @@ public class NPCController : MonoBehaviour
 
     [SerializeField] float timeBetweenAttack = 2f;
 
-    private NPCController enemy;
+    private EnemyNPCController enemy;
     private bool alreadyAttacked;
 
     [SerializeField] private Transform bulletProjectile;
@@ -61,14 +61,15 @@ public class NPCController : MonoBehaviour
             playerInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsPlayer);
             
             enemyInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsEnemy);
-            enemyInAttackRange = Physics.CheckSphere(transform.position,sightRange,whatIsEnemy);
+            enemyInAttackRange = Physics.CheckSphere(transform.position,attackRange,whatIsEnemy);
+
             distanceFromPlayer = Vector3.Distance(player.transform.position,transform.position);
             distanceFromEnemy = Vector3.Distance(player.transform.position,transform.position);
             if(!salute && distanceFromPlayer < 30)
             {
-                salute = false;
                 nav.destination = transform.position;
                 npcAnimation.salute();
+                salute = false;
             }
             if(playerInSightRange && !enemyInSightRange)
             {
@@ -76,7 +77,7 @@ public class NPCController : MonoBehaviour
             }
             else 
                 StopWalking();
-                
+
             if(enemyInSightRange) 
                 NpcAttack(); 
             else if(!isToPlayer)
@@ -95,7 +96,7 @@ public class NPCController : MonoBehaviour
             Collider[] colliderArray = Physics.OverlapSphere(transform.position,sightRange, whatIsEnemy);
                     foreach (Collider collider in colliderArray )
                     {
-                        if(collider.TryGetComponent<NPCController>(out NPCController npc))
+                        if(collider.TryGetComponent<EnemyNPCController>(out EnemyNPCController npc))
                         {   
                             if(!npc.isDead())
                             {
@@ -116,7 +117,7 @@ public class NPCController : MonoBehaviour
         }
     }
 
-    private void AttackEnemy(NPCController npc)
+    private void AttackEnemy(EnemyNPCController npc)
     {
         if(enemyInAttackRange)
         {
@@ -284,6 +285,8 @@ public class NPCController : MonoBehaviour
         if(health <= 0)
         {
             dead = true;
+            this.gameObject.layer = LayerMask.NameToLayer("Default");
+            this.gameObject.GetComponent<CharacterController>().enabled = false;
             npcAnimation.PlayerDead();
         }
         else

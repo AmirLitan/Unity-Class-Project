@@ -9,6 +9,10 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI promptText;
     [SerializeField] private RawImage follow;
     [SerializeField] private RawImage attack;
+
+    //Health
+    [SerializeField] private float health = 200;
+    [SerializeField] private bool dead;
     // Start is called before the first frame update
     void Start()
     {
@@ -36,4 +40,22 @@ public class PlayerUI : MonoBehaviour
         else
             attack.color = Color.red;  
    }
+
+      public bool isDead()
+    {
+        return dead;
+    }
+
+    public void getHit(int damage)
+    {
+        health = health - damage;
+        if(health <= 0)
+        {
+            dead = true;
+        }
+        else
+        {
+            //ui sow how mach health player have
+        }
+    }
 }
