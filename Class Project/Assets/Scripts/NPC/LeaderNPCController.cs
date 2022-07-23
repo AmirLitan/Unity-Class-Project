@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 public class LeaderNPCController : MonoBehaviour
 {
-    public bool isLeader;
-    
+    public bool isAttacking;
+    public GameObject player;
     public LayerMask whatIsEnemy;
     public LayerMask whatIsPlayer;
     public NPCAnimation npcAnimation;
@@ -49,7 +50,7 @@ public class LeaderNPCController : MonoBehaviour
     [SerializeField] float timeBetweenAttack = 2f;
 
     private NPCController enemy;
-    private PlayerUI player;
+    private PlayerUI playerUi;
     private bool alreadyAttacked;
 
     [SerializeField] private Transform bulletProjectile;
@@ -77,9 +78,11 @@ public class LeaderNPCController : MonoBehaviour
                 playerInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsPlayer);
 
                 enemyInAttackRange = Physics.CheckSphere(transform.position,attackRange,whatIsEnemy);    
-                playerInAttackRange = Physics.CheckSphere(transform.position,attackRange,whatIsPlayer);
+                playerInAttackRange = Physics.CheckSphere(transform.position,attackRange+1,whatIsPlayer);
 
-                if(enemyInSightRange || playerInSightRange) 
+                distanceFromEnemy = Vector3.Distance(player.gameObject.transform.position,transform.position);
+
+                if(playerInSightRange || enemyInSightRange) 
                 {
                     NpcAttack(); 
                 }
@@ -155,6 +158,7 @@ public class LeaderNPCController : MonoBehaviour
     {
          if(!playerInSight)
         {
+            npcAnimation.isFireing = false;
             Collider[] colliderArray = Physics.OverlapSphere(transform.position,sightRange, whatIsPlayer);
                     foreach (Collider collider in colliderArray )
                     {
@@ -162,15 +166,15 @@ public class LeaderNPCController : MonoBehaviour
                         {   
                             if(!player.isDead())
                             {
-                                this.player = player;
+                                playerUi = player;
                                 playerInSight = true;
                             }
                         }
                     }
         }
-        else if(!player.isDead())
+        else if(!playerUi.isDead())
         {
-            AttackEnemy(player.transform);
+            AttackEnemy(playerUi.transform);
         } 
         else
         {
@@ -183,7 +187,7 @@ public class LeaderNPCController : MonoBehaviour
     {
         if(!enemyInSight)
         {
-            npcAnimation.isFireing = false;
+           // npcAnimation.isFireing = false;
             Collider[] colliderArray = Physics.OverlapSphere(transform.position,sightRange, whatIsEnemy);
                     foreach (Collider collider in colliderArray )
                     {
@@ -210,9 +214,11 @@ public class LeaderNPCController : MonoBehaviour
 
     private void AttackEnemy(Transform t)
     {
-        if(enemyInAttackRange)
+        if(enemyInAttackRange || playerInAttackRange)
         {
+            
             StopWalking();
+            //nav.destination = transform.position;
             transform.LookAt(t);
             if(!alreadyAttacked)
             {
@@ -220,14 +226,12 @@ public class LeaderNPCController : MonoBehaviour
                 Instantiate(bulletProjectile, spawnBulletPosistion.position , Quaternion.LookRotation(spawnBulletPosistion.forward , Vector3.up));
 
                 npcAnimation.isFireing = true;
-                
                 alreadyAttacked = true;
                 Invoke(nameof(ResetAttack), timeBetweenAttack);
             }
         }
         else
         {
-            Debug.Log("enemyInAttackRange = false");
             npcAnimation.isFireing = false;
             nav.destination = t.position;
             if(nav.velocity.magnitude > 1)
@@ -395,6 +399,10 @@ public class LeaderNPCController : MonoBehaviour
             this.gameObject.layer = LayerMask.NameToLayer("Default");
             this.gameObject.GetComponent<CharacterController>().enabled = false;
             npcAnimation.PlayerDead();
+            if(isAttacking)
+            {
+                SceneManager.LoadScene(3);
+            }
         }
         else
         {

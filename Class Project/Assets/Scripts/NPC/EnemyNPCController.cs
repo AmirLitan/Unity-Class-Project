@@ -8,8 +8,10 @@ public class EnemyNPCController : MonoBehaviour
     public bool isLeader;
     
     public GameObject leader;
+    private PlayerUI playerUi;
     public LayerMask whatIsLeader;
     public LayerMask whatIsEnemy;
+    public LayerMask whatIsPlayer;
     public NPCAnimation npcAnimation;
     private NavMeshAgent nav;
 
@@ -20,6 +22,8 @@ public class EnemyNPCController : MonoBehaviour
     [SerializeField] private bool leaderInSightRange;
     [SerializeField] private bool enemyInSightRange;
     [SerializeField] private bool enemyInAttackRange;
+    [SerializeField] private bool playerInSightRange;
+    [SerializeField] private bool playerInAttackRange;
 
     [SerializeField] private bool isPlayerInteract;
     [SerializeField] private bool isUse;
@@ -27,6 +31,7 @@ public class EnemyNPCController : MonoBehaviour
     [SerializeField] private bool isPotroll;
     [SerializeField] private bool isAttack;
     [SerializeField] private bool enemyInSight;
+     [SerializeField] private bool playerInSight;
 
     //Health
     [SerializeField] private float health = 100;
@@ -36,6 +41,7 @@ public class EnemyNPCController : MonoBehaviour
 
     private float distanceFromLeader;
     private float distanceFromEnemy;
+    private float distanceFromPlayer;
 
     [SerializeField] float timeBetweenAttack = 2f;
 
@@ -61,6 +67,9 @@ public class EnemyNPCController : MonoBehaviour
         {
             leaderInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsLeader);
             
+            playerInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsPlayer);
+            playerInAttackRange = Physics.CheckSphere(transform.position,attackRange,whatIsPlayer);
+
             enemyInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsEnemy);
             enemyInAttackRange = Physics.CheckSphere(transform.position,attackRange,whatIsEnemy);
 
@@ -73,14 +82,14 @@ public class EnemyNPCController : MonoBehaviour
                 nav.destination = transform.position;
                 npcAnimation.salute();
             }
-            if(leaderInSightRange && !enemyInSightRange)
+            if(leaderInSightRange && !enemyInSightRange && !playerInSightRange)
             {
                 NpcToLeader(leader); 
             }
             else 
                 StopWalking();
                 
-            if(enemyInSightRange) 
+            if(enemyInSightRange || playerInSightRange) 
                 NpcAttack(); 
             else if(!isToLeader)
             {
@@ -93,8 +102,44 @@ public class EnemyNPCController : MonoBehaviour
 
     private void NpcAttack()
     {
+        IfPlayerInSight();
+        IfEnemyInSight();
+    }
+
+    private void IfPlayerInSight()
+    {
+         if(!playerInSight)
+        {
+            npcAnimation.isFireing = false;
+            Collider[] colliderArray = Physics.OverlapSphere(transform.position,sightRange, whatIsPlayer);
+                    foreach (Collider collider in colliderArray )
+                    {
+                        if(collider.TryGetComponent<PlayerUI>(out PlayerUI player))
+                        {   
+                            if(!player.isDead())
+                            {
+                                playerUi = player;
+                                playerInSight = true;
+                            }
+                        }
+                    }
+        }
+        else if(!playerUi.isDead())
+        {
+            AttackEnemy(playerUi.transform);
+        } 
+        else
+        {
+            playerInSight = false;
+            npcAnimation.isFireing = false;
+        }
+    }
+
+    private void IfEnemyInSight()
+    {
         if(!enemyInSight)
         {
+           // npcAnimation.isFireing = false;
             Collider[] colliderArray = Physics.OverlapSphere(transform.position,sightRange, whatIsEnemy);
                     foreach (Collider collider in colliderArray )
                     {
@@ -110,7 +155,7 @@ public class EnemyNPCController : MonoBehaviour
         }
         else if(!enemy.isDead())
         {
-            AttackEnemy(enemy);
+            AttackEnemy(enemy.transform);
         } 
         else
         {
@@ -119,29 +164,28 @@ public class EnemyNPCController : MonoBehaviour
         }
     }
 
-    private void AttackEnemy(NPCController npc)
+    private void AttackEnemy(Transform t)
     {
-        if(enemyInAttackRange)
+        if(enemyInAttackRange || playerInAttackRange)
         {
+            
             StopWalking();
-            transform.LookAt(npc.transform);
+            //nav.destination = transform.position;
+            transform.LookAt(t);
             if(!alreadyAttacked)
             {
-
                 Instantiate(vfxFire, spawnBulletPosistion.position , Quaternion.LookRotation(spawnBulletPosistion.position, Vector3.up));
                 Instantiate(bulletProjectile, spawnBulletPosistion.position , Quaternion.LookRotation(spawnBulletPosistion.forward , Vector3.up));
 
                 npcAnimation.isFireing = true;
-                
                 alreadyAttacked = true;
                 Invoke(nameof(ResetAttack), timeBetweenAttack);
             }
         }
         else
         {
-            Debug.Log("enemyInAttackRange = false");
             npcAnimation.isFireing = false;
-            nav.destination = npc.transform.position;
+            nav.destination = t.position;
             if(nav.velocity.magnitude > 1)
             {
                 npcAnimation.isWalking = true;

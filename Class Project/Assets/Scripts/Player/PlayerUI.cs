@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -52,6 +53,7 @@ public class PlayerUI : MonoBehaviour
         if(health <= 0)
         {
             dead = true;
+            SceneManager.LoadScene(4);
         }
         else
         {
